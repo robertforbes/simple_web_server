@@ -5,7 +5,7 @@
 -export([start/1, stop/0]).
 
 %% Exports required of a dispatcher.
--export([init/2, handle/2, terminate/3]).
+-export([init/2]).
 
 start(Port) ->
     %ok = application:start(crypto),    
@@ -43,23 +43,17 @@ init(Req, Opts) ->
         Req),
     {ok, Req2, Opts}.
 
-%init({tcp, http}, Req, _Opts) ->
-%    {ok, Req, undefined}.
-
-handle(Req, State) ->
-    {Path, Req1} = cowboy_req:path(Req),
-    Response = read_file(Path),
-    {ok, Req2} = cowboy_req:reply(200, [], Response, Req1),
-    {ok, Req2, State}.
-
-terminate(_Reason, _Req, _State) ->
-    ok.
+%%handle(Req, State) ->
+%%    {Path, Req1} = cowboy_req:path(Req),
+%%    Response = read_file(Path),
+%%    {ok, Req2} = cowboy_req:reply(200, [], Response, Req1),
+%%    {ok, Req2, State}.
 
 %% Internal functions.
-read_file(Path) ->
-    File = ["."|binary_to_list(Path)],
-    case file:read_file(File) of
-        {ok, Bin} -> Bin;
-        _ -> ["<pre>cannot read:", File, "</pre>"]
-    end.
+%%read_file(Path) ->
+%%    File = ["."|binary_to_list(Path)],
+%%    case file:read_file(File) of
+%%        {ok, Bin} -> Bin;
+%%        _ -> ["<pre>cannot read:", File, "</pre>"]
+%%    end.
 
