@@ -18,7 +18,7 @@ start(Port) ->
 
     % Routes are {URIhost, list({URIpath Handler, Opts}}.
     Dispatch = cowboy_router:compile([
-        {'_', [{'_', simple_web_server, []}]}]),
+        {'_', [{"/4607/", simple_web_server, []}]}]),
 
     % Start the web server.
     cowboy:start_http(
@@ -39,7 +39,7 @@ stop() ->
 init(Req, Opts) ->
     Req2 = cowboy_req:reply(200,
         [{<<"content-type">>, <<"text/plain">>}],
-        <<"Hello Erlang!">>,
+        <<"Hello Erlang! Serving 4607 data.">>,
         Req),
     {ok, Req2, Opts}.
 
