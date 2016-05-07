@@ -5,7 +5,8 @@
 -export([start/1, stop/0]).
 
 %% Exports required of a dispatcher.
--export([init/2]).
+%%-export([init/2]).
+-export([init/3, handle/2, terminate/3]).
 
 start(Port) ->
     %ok = application:start(crypto),    
@@ -17,8 +18,11 @@ start(Port) ->
     N_acceptors = 10,
 
     % Routes are {URIhost, list({URIpath Handler, Opts}}.
+    %Dispatch = cowboy_router:compile([
+    %    {'_', [{"/4607/", simple_web_server, []}]}]),
+
     Dispatch = cowboy_router:compile([
-        {'_', [{"/4607/", simple_web_server, []}]}]),
+        {'_', [{'_', simple_web_server, []}]}]),
 
     % Start the web server.
     cowboy:start_http(
@@ -36,24 +40,32 @@ stop() ->
 
 %% Dispatcher functions.
 
-init(Req, Opts) ->
-    Req2 = cowboy_req:reply(200,
-        [{<<"content-type">>, <<"text/plain">>}],
-        <<"Hello Erlang! Serving 4607 data.">>,
-        Req),
-    {ok, Req2, Opts}.
+%%init(Req, Opts) ->
+%%    Req2 = cowboy_req:reply(200,
+%%        [{<<"content-type">>, <<"text/plain">>}],
+%%        <<"Hello Erlang! Serving 4607 data.">>,
+%%        Req),
+%%    {ok, Req2, Opts}.
 
-%%handle(Req, State) ->
-%%    {Path, Req1} = cowboy_req:path(Req),
-%%    Response = read_file(Path),
-%%    {ok, Req2} = cowboy_req:reply(200, [], Response, Req1),
-%%    {ok, Req2, State}.
+init({tcp, http}, Req, _Opts) ->
+    {ok, Req, undefined}.
+
+handle(Req, State) ->
+    {Path, Req1} = cowboy_req:path(Req),
+    io:format("Path: ~p~n", [Path]),
+    Response = read_file(Path),
+    {ok, Req2} = cowboy_req:reply(200, [], Response, Req1),
+    {ok, Req2, State}.
+
+terminate(_Reason, _Req, _State) ->
+    ok.
 
 %% Internal functions.
-%%read_file(Path) ->
-%%    File = ["."|binary_to_list(Path)],
-%%    case file:read_file(File) of
-%%        {ok, Bin} -> Bin;
-%%        _ -> ["<pre>cannot read:", File, "</pre>"]
-%%    end.
+read_file(Path) ->
+    File = ["."|binary_to_list(Path)],
+    case file:read_file(File) of
+        {ok, Bin} -> Bin;
+        _ -> ["<pre>cannot read:", File, "</pre>"]
+    end.
+
 
